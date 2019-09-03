@@ -7,9 +7,8 @@
 #include <unistd.h>
 
 #define UINPUT_PATH "/dev/uinput"
-#define KEYBOARD_PATH "/dev/input/by-id/usb-Cypress_Cypress_USB_Keyboard___PS2_Mouse-event-kbd"
-#define MIN_MSEC 40
-
+#define KEYBOARD_PATH "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
+#define MIN_MSEC 50
 static int constructKeyboard (char *name, struct input_id *id, unsigned long *keymask) {
   int i, fd;
   if (-1 == (fd = open(UINPUT_PATH, O_WRONLY))) {
@@ -87,6 +86,7 @@ int main(int argc, char *argv[]) {
       time  = event.time.tv_sec * 1000 + event.time.tv_usec / 1000;
       if (event.value == 1) {
         if (time - press_time[event.code] < MIN_MSEC) {
+          syslog(LOG_INFO, "suppress time:%d press_time:%d", time, press_time[event.code]);
           syslog(LOG_INFO, "suppress %d %d %d", time, event.value, event.code);
           continue;
         }
